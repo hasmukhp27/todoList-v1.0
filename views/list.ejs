@@ -1,0 +1,20 @@
+<%- include('header'); -%>
+
+    <div class="box" id="heading"> 
+        <h1> <%= typeOfList %> List</h1>
+        <h2> <%= dayOfWeek %> </h2> 
+    </div>
+    <div class="box" id="">
+        <% for (let i = 0; i < newItems.length; i++) { %>
+            <div class="item">
+                <input type="checkbox">
+                <p> <%= newItems[i] %> </p>
+            </div>                
+        <% } %>
+        <form class="item" action="/" method="POST">
+            <input type="text" name="newItem" placeholder="New Item" autocomplete="off" required>
+            <button type="submit" name="addButton" value="<%=  typeOfList %>">+</button>
+        </form>
+    </div>
+
+<%- include('footer') -%> 
