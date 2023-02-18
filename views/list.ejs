@@ -5,12 +5,14 @@
         <h2> <%= dayOfWeek %> </h2> 
     </div>
     <div class="box" id="">
-        <% for (let i = 0; i < newItems.length; i++) { %>
+        <form id="listItemsForm" action="/delete" method="post">
+        <% newItems.forEach(element => {%>
             <div class="item">
-                <input type="checkbox">
-                <p> <%= newItems[i] %> </p>
+                <input type="checkbox" name="checkboxId" value="<%=element._id %>" onchange="document.getElementById('listItemsForm').submit()" >
+                <p> <%= element.itemName %> </p>
             </div>                
-        <% } %>
+        <% }); %>
+        </form>
         <form class="item" action="/" method="POST">
             <input type="text" name="newItem" placeholder="New Item" autocomplete="off" required>
             <button type="submit" name="addButton" value="<%=  typeOfList %>">+</button>
