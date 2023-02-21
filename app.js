@@ -43,8 +43,7 @@ const itemsSchema = new mongoose.Schema ({
     },
     itemType: {
         type: String,
-        required: [true, 'Classify what type of Item?'],
-        enum: ['Personnel','Work']
+        required: [true, 'Classify what type of Item?']
     },
     status: {
       type: String,
@@ -53,10 +52,46 @@ const itemsSchema = new mongoose.Schema ({
     },
   });
 
+const listsSchema = new mongoose.Schema ({
+    name: {
+        type: String
+    },
+    items: {
+        type: [itemsSchema]
+    }
+});
+
 const Item = mongoose.model("Item",itemsSchema);
 
+const List = mongoose.model("List", listsSchema);
+
+const item1 = Item(
+    {
+        itemName: "Buy Grocery",
+        itemType: "Personnel",
+        status: "NEW"
+    }
+);
+
+const item2 = Item(
+    {
+        itemName: "Cook Food",
+        itemType: "Personnel",
+        status: "NEW"
+    }
+);
+
+const item3 = Item(
+    {
+        itemName: "Clean Dishes",
+        itemType: "Personnel",
+        status: "NEW"
+    }
+);
+
+const defaultItemsList = [ item1, item2, item3];
  
-app.get('/Personnel', (req, res)=> {
+/* app.get('/Personnel', (req, res)=> {
 
 
     let listKind = req.path;
@@ -68,31 +103,7 @@ app.get('/Personnel', (req, res)=> {
           console.log(err);
         }else{ 
           //mongoose.connection.close();
-            const item1 = Item(
-                {
-                    itemName: "Buy Grocery",
-                    itemType: "Personnel",
-                    status: "NEW"
-                }
-            );
             
-            const item2 = Item(
-                {
-                    itemName: "Cook Food",
-                    itemType: "Personnel",
-                    status: "NEW"
-                }
-            );
-
-            const item3 = Item(
-                {
-                    itemName: "Clean Dishes",
-                    itemType: "Personnel",
-                    status: "NEW"
-                }
-            );
-
-            const defaultItemsList = [ item1, item2, item3];
 
             if (itemArr.length === 0){
                 Item.insertMany(defaultItemsList, (err) =>{
@@ -113,37 +124,58 @@ app.get('/Personnel', (req, res)=> {
         }
       });   
   
-})
+}) */
 
-app.get('/Work',(req, res) => {
-    let listKind = req.path;
-    res.render('list',{dayOfWeek: currentDay, newItems: workItems, typeOfList: listKind.slice(1,)});
+app.get('/:customListName',(req, res) => {
+    let listKind = req.params.customListName;
+    //console.log(listKind);
+
+    List.findOne({name: listKind}, (err, foundList)=>{
+        if(!err){
+            if( foundList === null){
+                // create a new list
+
+                const newList = new List({
+                    name: listKind,
+                    items: defaultItemsList
+                });
+            
+                newList.save();
+                res.redirect("/"+listKind);
+            }
+            else{
+
+                // show the existing list
+                //console.log(listKind+" list already exists!")
+                res.render('list',{dayOfWeek: currentDay, newItems: foundList.items, typeOfList: foundList.name});
+            }
+            
+        }else{
+            console.log("Error received => "+err);   
+        }
+    });
+    
+    
+
+
+    //res.render('list',{dayOfWeek: currentDay, newItems: workItems, typeOfList: listKind.slice(1,)});
 })
 
 app.post('/', (req, res) => {
-    let newItem = req.body.newItem;
-    let typeOfAdd = req.body.addButton;
-    let itemToAdd = null;
-    if (typeOfAdd === "Personnel") {
-        itemToAdd = new Item({
-            itemName: newItem,
-            itemType: "Personnel",
-            status: "NEW"
+    let newListItem = req.body.newItem;
+    let currentlistItem = new List({
+            name: newListItem.name,
+            items : {
+                itemName: newListItem.item.itemName,
+                itemType: newListItem.name,
+                status: "NEW"
+            }
+            
         })
         
-        //personnelItems.push(newItem);
-    }
-    else{
-        itemToAdd = new Item({
-            itemName: newItem,
-            itemType: "Work",
-            status: "NEW"
-        })
-        //workItems.push(newItem);
-    }
-    itemToAdd.save();
-    console.log("Passed Item is --> "+newItem);
-    res.redirect("/"+ typeOfAdd);
+    currentlistItem.save();
+    console.log("Passed Item is --> "+currentlistItem);
+    //res.redirect("/"+ newListItem.name);
 })
 
 app.post('/delete', (req, res) => {
