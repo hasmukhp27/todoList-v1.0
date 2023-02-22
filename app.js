@@ -3,6 +3,9 @@ const bodyParser = require('body-parser');
 const getDate = require('./date');
 const date = require(__dirname + "/date.js");
 const mongoose = require('mongoose');
+const _ = require("lodash");
+
+
 
 mongoose.set("strictQuery", false);
 
@@ -37,13 +40,9 @@ async function main() {
 }
 
 const itemsSchema = new mongoose.Schema ({
-    itemName: {
+    name: {
       type: String,
       required: [true, 'Why no name?']
-    },
-    itemType: {
-        type: String,
-        required: [true, 'Classify what type of Item?']
     },
     status: {
       type: String,
@@ -67,36 +66,33 @@ const List = mongoose.model("List", listsSchema);
 
 const item1 = Item(
     {
-        itemName: "Buy Grocery",
-        itemType: "Personnel",
+        name: "Buy Grocery",
         status: "NEW"
     }
 );
 
 const item2 = Item(
     {
-        itemName: "Cook Food",
-        itemType: "Personnel",
+        name: "Cook Food",
         status: "NEW"
     }
 );
 
 const item3 = Item(
     {
-        itemName: "Clean Dishes",
-        itemType: "Personnel",
+        name: "Clean Dishes",
         status: "NEW"
     }
 );
 
 const defaultItemsList = [ item1, item2, item3];
  
-/* app.get('/Personnel', (req, res)=> {
+app.get('/', (req, res)=> {
 
 
-    let listKind = req.path;
+    //let listKind = req.path;
 
-    console.log("I'm here inside Get For Personnel with path at "+listKind);
+    console.log("I'm here inside Get For Default path");
 
     Item.find({},function(err, itemArr){
         if(err){
@@ -113,21 +109,21 @@ const defaultItemsList = [ item1, item2, item3];
                         console.log("Successfully saved the default items to the lists");
                     }
                 });
-                res.redirect("/Personnel");
+                res.redirect("/");
             }
             else{
-                res.render('list',{dayOfWeek: currentDay, newItems: itemArr, typeOfList: listKind.slice(1,)});
+                res.render('list',{dayOfWeek: currentDay, newItems: itemArr, typeOfList: "Default" });
                 itemArr.forEach(element => {
-                    console.log(element.itemName);
+                    console.log(element.name);
                 });
             }           
         }
       });   
   
-}) */
+})
 
 app.get('/:customListName',(req, res) => {
-    let listKind = req.params.customListName;
+    let listKind = _.capitalize(req.params.customListName);
     //console.log(listKind);
 
     List.findOne({name: listKind}, (err, foundList)=>{
@@ -148,8 +144,10 @@ app.get('/:customListName',(req, res) => {
                 // show the existing list
                 //console.log(listKind+" list already exists!")
                 res.render('list',{dayOfWeek: currentDay, newItems: foundList.items, typeOfList: foundList.name});
+            
             }
             
+
         }else{
             console.log("Error received => "+err);   
         }
@@ -167,33 +165,49 @@ app.post('/', (req, res) => {
     
     const item = Item(
         {
-            itemName: newListItem,
-            itemType: listType,
+            name: newListItem,
             status: "NEW"
         }
     );
-
-
-    List.findOne({name: listType}, (err, foundList) =>{
-        foundList.items.push(item);
-        foundList.save();
-    })
-        
     console.log("Passed Item is --> "+item);
-    res.redirect("/"+ listType);
+
+    if (listType === "Default"){
+        item.save();
+        res.redirect("/");
+    }
+    else {
+        List.findOne({name: listType}, (err, foundList) =>{
+            foundList.items.push(item);
+            foundList.save();
+        });
+        res.redirect("/"+ listType);
+    }        
+        
 })
 
 app.post('/delete', (req, res) => {
     let deleteItemId = req.body.checkboxId;
-    List.deleteOne({_id:deleteItemId},(err)=>{
-        if (err){
-            console.log(err);
-            //mongoose.connection.close();
-          }
-    });
+    let listType = req.body.listName;
+
+
+    if(listType === "Default"){
+        Item.deleteOne({_id:deleteItemId},(err)=>{
+            if (err){
+                console.log(err);
+                //mongoose.connection.close();
+            }
+        });
+        res.redirect("/");
+    }
+    else{
+        List.findOneAndUpdate({ name: listType}, {$pull : { items : {_id : deleteItemId }}}, (err, foundList)=>{
+            if(!err){
+                console.log("Successfullly found and removed through findOneAndUpdate ==> ");
+            }
+        });
+        res.redirect("/"+ listType);
+    }        
     console.log("Deleted Item is --> "+deleteItemId);
-    res.redirect("/Personnel");
-    
 })
 
 

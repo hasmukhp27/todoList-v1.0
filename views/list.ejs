@@ -9,10 +9,11 @@
         <form id="listItemsForm" action="/delete" method="post">
         <% newItems.forEach(element => {%>
             <div class="item">
-                <input type="checkbox" name="checkboxId" value="<%=element._id+"-"+typeOfList %>" onchange="document.getElementById('listItemsForm').submit()" >
-                <p> <%= element.itemName %> </p>
+                <input type="checkbox" name="checkboxId" value="<%= element._id %>" onchange="document.getElementById('listItemsForm').submit()" >
+                <p> <%= element.name %> </p>
             </div>                
         <% }); %>
+            <input type="hidden" name="listName" value="<%= typeOfList %>"></input>
         </form>
         <form class="item" action="/" method="POST">
             <input type="text" name="newItem" placeholder="New Item" autocomplete="off" required>
