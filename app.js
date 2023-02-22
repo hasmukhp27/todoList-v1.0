@@ -27,6 +27,8 @@ const port = 2936;
 
 const currentDay = date.getDate();
 
+// Below is the mongo DB url strings
+
 const mongoDB = "mongodb://listsAdmin:Listadmin123@127.0.0.1:27017/todoListsDB";
 
 main().catch(err => console.log(err));
