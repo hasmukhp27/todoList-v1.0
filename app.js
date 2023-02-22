@@ -163,24 +163,29 @@ app.get('/:customListName',(req, res) => {
 
 app.post('/', (req, res) => {
     let newListItem = req.body.newItem;
-    let currentlistItem = new List({
-            name: newListItem.name,
-            items : {
-                itemName: newListItem.item.itemName,
-                itemType: newListItem.name,
-                status: "NEW"
-            }
-            
-        })
+    let listType = req.body.addButton;
+    
+    const item = Item(
+        {
+            itemName: newListItem,
+            itemType: listType,
+            status: "NEW"
+        }
+    );
+
+
+    List.findOne({name: listType}, (err, foundList) =>{
+        foundList.items.push(item);
+        foundList.save();
+    })
         
-    currentlistItem.save();
-    console.log("Passed Item is --> "+currentlistItem);
-    //res.redirect("/"+ newListItem.name);
+    console.log("Passed Item is --> "+item);
+    res.redirect("/"+ listType);
 })
 
 app.post('/delete', (req, res) => {
     let deleteItemId = req.body.checkboxId;
-    Item.deleteOne({_id:deleteItemId},(err)=>{
+    List.deleteOne({_id:deleteItemId},(err)=>{
         if (err){
             console.log(err);
             //mongoose.connection.close();
