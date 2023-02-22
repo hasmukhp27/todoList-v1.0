@@ -66,21 +66,21 @@ const List = mongoose.model("List", listsSchema);
 
 const item1 = Item(
     {
-        name: "Buy Grocery",
+        name: "Sample New Item 1",
         status: "NEW"
     }
 );
 
 const item2 = Item(
     {
-        name: "Cook Food",
+        name: "Sample New Item 2",
         status: "NEW"
     }
 );
 
 const item3 = Item(
     {
-        name: "Clean Dishes",
+        name: "Sample New Item 3",
         status: "NEW"
     }
 );
