@@ -5,6 +5,11 @@ const date = require(__dirname + "/date.js");
 const mongoose = require('mongoose');
 const _ = require("lodash");
 
+require("dotenv").config();
+const srvURL = process.env.N1_URL;
+const dbUser = process.env.N1_KEY;
+const dbPasswd = process.env.N1_SECRET;
+const dbName = process.env.N1_DB;
 
 
 mongoose.set("strictQuery", false);
@@ -28,8 +33,10 @@ const port = 2936;
 const currentDay = date.getDate();
 
 // Below is the mongo DB url strings
+//mongo "mongodb+srv://cluster-hp-01.fr9grbr.mongodb.net/todoListsDB" --username mongoadmin
 
-const mongoDB = "mongodb://listsAdmin:Listadmin123@127.0.0.1:27017/todoListsDB";
+//const mongoDB = "mongodb://"+dbUser+":"+dbPasswd+"@"+srvURL+"/"+dbName;
+const mongoDB = 'mongodb+srv://'+dbUser+':'+dbPasswd+'@'+srvURL+'/'+dbName+'?retryWrites=true&w=majority';
 
 main().catch(err => console.log(err));
 async function main() {
