@@ -6,6 +6,8 @@ const mongoose = require('mongoose');
 const _ = require("lodash");
 
 require("dotenv").config();
+
+//Setting up MongoDB COnnections and it's values through process envirnment variables. 
 const srvURL = process.env.N1_URL;
 const dbUser = process.env.N1_KEY;
 const dbPasswd = process.env.N1_SECRET;
@@ -51,6 +53,7 @@ async function main() {
 const itemsSchema = new mongoose.Schema ({
     name: {
       type: String,
+      maxLength: 50,
       required: [true, 'Why no name?']
     },
     status: {
