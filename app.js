@@ -8,10 +8,10 @@ const _ = require("lodash");
 require("dotenv").config();
 
 //Setting up MongoDB COnnections and it's values through process envirnment variables. 
-const srvURL = process.env.N1_URL;
-const dbUser = process.env.N1_KEY;
-const dbPasswd = process.env.N1_SECRET;
-const dbName = process.env.N1_DB;
+const srvURL = process.env.N1_URL || "127.0.0.1:27017";
+const dbUser = process.env.N1_KEY || "listsAdmin";
+const dbPasswd = process.env.N1_SECRET || "Listadmin123";
+const dbName = process.env.N1_DB || "todoListsDB";
 
 
 mongoose.set("strictQuery", false);
@@ -37,8 +37,8 @@ const currentDay = date.getDate();
 // Below is the mongo DB url strings
 //mongo "mongodb+srv://cluster-hp-01.fr9grbr.mongodb.net/todoListsDB" --username mongoadmin
 
-//const mongoDB = "mongodb://"+dbUser+":"+dbPasswd+"@"+srvURL+"/"+dbName;
-const mongoDB = 'mongodb+srv://'+dbUser+':'+dbPasswd+'@'+srvURL+'/'+dbName+'?retryWrites=true&w=majority';
+const mongoDB = "mongodb://"+dbUser+":"+dbPasswd+"@"+srvURL+"/"+dbName;
+//const mongoDB = 'mongodb+srv://'+dbUser+':'+dbPasswd+'@'+srvURL+'/'+dbName+'?retryWrites=true&w=majority';
 
 main().catch(err => console.log(err));
 async function main() {
@@ -173,7 +173,7 @@ app.get('/:customListName',(req, res) => {
 
 app.post('/', (req, res) => {
     let newListItem = req.body.newItem;
-    let listType = req.body.addButton;
+    let listType = req.body.listName;
     
     const item = Item(
         {
@@ -182,6 +182,7 @@ app.post('/', (req, res) => {
         }
     );
     console.log("Passed Item is --> "+item);
+    console.log("Passed listType is --> "+listType);
 
     if (listType === "Default"){
         item.save();
@@ -198,28 +199,62 @@ app.post('/', (req, res) => {
 })
 
 app.post('/delete', (req, res) => {
-    let deleteItemId = req.body.checkboxId;
+    let deleteItemIds = req.body.checkboxId;
     let listType = req.body.listName;
-
+    
+    console.log("The array length of delete Item lists is ==>"+deleteItemIds.length);
+    
 
     if(listType === "Default"){
-        Item.deleteOne({_id:deleteItemId},(err)=>{
-            if (err){
-                console.log(err);
-                //mongoose.connection.close();
-            }
-        });
+        if (Array.isArray(deleteItemIds)){
+            deleteItemIds.forEach((itemId) =>{
+                Item.updateOne({_id:itemId},{status:"COMPLETE"},(err)=>{
+                    if (err){
+                        console.log(err);
+                        //mongoose.connection.close();
+                    }
+                });
+            });
+        }
+        else{
+            Item.updateOne({_id:deleteItemIds},{status:"COMPLETE"},(err)=>{
+                if (err){
+                    console.log(err);
+                    //mongoose.connection.close();
+                }
+            });
+        }
+                
         res.redirect("/");
     }
     else{
-        List.findOneAndUpdate({ name: listType}, {$pull : { items : {_id : deleteItemId }}}, (err, foundList)=>{
+        if (Array.isArray(deleteItemIds)){
+            deleteItemIds.forEach((itemId) =>{
+                List.updateOne({ name: listType}, {$set:{"items.$[elem].status":"COMPLETE"}}, {arrayFilters: [{"elem._id":itemId}]}, (err, foundList)=>{
+                    if(!err){
+                        console.log("Successfullly found and removed all through findOneAndUpdate ==> ");
+                    }
+                });
+            });
+        }
+        else{
+            List.updateOne({ name: listType}, {$set:{"items.$[elem].status":"COMPLETE"}}, {arrayFilters: [{"elem._id":deleteItemIds}]}, (err, foundList)=>{
+                if(!err){
+                    console.log("Successfullly found and removed one through findOneAndUpdate ==> ");
+                }
+            });
+        }
+        
+        res.redirect("/"+ listType);
+
+        /* List.findOneAndUpdate({ name: listType}, {$pull : { items : {_id : deleteItemIds }}}, (err, foundList)=>{
             if(!err){
                 console.log("Successfullly found and removed through findOneAndUpdate ==> ");
             }
-        });
-        res.redirect("/"+ listType);
+        }); */
+
     }        
-    console.log("Deleted Item is --> "+deleteItemId);
+    console.log("Deleted Item is --> "+deleteItemIds);
 })
 
 
