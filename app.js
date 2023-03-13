@@ -53,7 +53,7 @@ async function main() {
 const itemsSchema = new mongoose.Schema ({
     name: {
       type: String,
-      maxLength: 50,
+      maxLength: 55,
       required: [true, 'Why no name?']
     },
     status: {
