@@ -37,8 +37,8 @@ const currentDay = date.getDate();
 // Below is the mongo DB url strings
 //mongo "mongodb+srv://cluster-hp-01.fr9grbr.mongodb.net/todoListsDB" --username mongoadmin
 
-//const mongoDB = "mongodb://"+dbUser+":"+dbPasswd+"@"+srvURL+"/"+dbName;
-const mongoDB = 'mongodb+srv://'+dbUser+':'+dbPasswd+'@'+srvURL+'/'+dbName+'?retryWrites=true&w=majority';
+const mongoDB = "mongodb://"+dbUser+":"+dbPasswd+"@"+srvURL+"/"+dbName;
+//const mongoDB = 'mongodb+srv://'+dbUser+':'+dbPasswd+'@'+srvURL+'/'+dbName+'?retryWrites=true&w=majority';
 
 main().catch(err => console.log(err));
 async function main() {
@@ -83,21 +83,7 @@ const item1 = Item(
     }
 );
 
-const item2 = Item(
-    {
-        name: "Sample New Item 2",
-        status: "NEW"
-    }
-);
-
-const item3 = Item(
-    {
-        name: "Sample New Item 3",
-        status: "NEW"
-    }
-);
-
-const defaultItemsList = [ item1, item2, item3];
+const defaultItemsList = [ item1 ];
  
 app.get('/', (req, res)=> {
 
@@ -106,7 +92,7 @@ app.get('/', (req, res)=> {
 
     console.log("I'm here inside Get For Default path");
 
-    Item.find({},function(err, itemArr){
+    Item.find({},null,{sort: {status: -1}},function(err, itemArr){
         if(err){
           console.log(err);
         }else{ 
@@ -138,7 +124,7 @@ app.get('/:customListName',(req, res) => {
     let listKind = _.capitalize(req.params.customListName);
     //console.log(listKind);
 
-    List.findOne({name: listKind}, (err, foundList)=>{
+    List.findOne({name: listKind},null,{sort: {status: -1}}, (err, foundList)=>{
         if(!err){
             if( foundList === null){
                 // create a new list
@@ -155,7 +141,11 @@ app.get('/:customListName',(req, res) => {
 
                 // show the existing list
                 //console.log(listKind+" list already exists!")
-                res.render('list',{dayOfWeek: currentDay, newItems: foundList.items, typeOfList: foundList.name});
+                let sortedItems = foundList.items.sort((a,b)=>{if (a.status > b.status) {return -1;}});
+                //console.log("Sorted Items -->"+sortedItems);
+
+                //console.log("Items --> "+foundList);
+                res.render('list',{dayOfWeek: currentDay, newItems: sortedItems, typeOfList: foundList.name});
             
             }
             
