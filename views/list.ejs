@@ -8,17 +8,21 @@
     <div class="box" id="">
         <form id="listItemsForm" action="/delete" method="post">
         <% newItems.forEach(element => {%>
-            <div class="item">
-                <input type="checkbox" name="checkboxId" value="<%= element._id %>" onchange="document.getElementById('listItemsForm').submit()" >
-                <p> <%= element.name %> </p>
-            </div>                
+                <div class="item">
+                    <input type="checkbox" name="checkboxId" value="<%= element._id %>" onchange="document.getElementById('listItemsForm').submit()"  
+                    <% if (element.status === "COMPLETE") {  %> checked <% } %>>
+                    <p> <%= element.name %> </p>
+                </div> 
+                           
         <% }); %>
             <input type="hidden" name="listName" value="<%= typeOfList %>"></input>
+            
         </form>
         <form class="item" action="/" method="POST">
             <input type="text" name="newItem" placeholder="New Item" autocomplete="off" maxlength="50"  required>
-            <button type="submit" name="addButton" value="<%=  typeOfList %>">+</button>
+            <input type="hidden" name="listName" value="<%= typeOfList %>"></input>
+            <button type="submit" name="addButton" >+</button>
         </form>
     </div>
 
-<%- include('footer') -%> 
+<%- include('footer') -%>
