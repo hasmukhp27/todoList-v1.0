@@ -37,8 +37,8 @@ const currentDay = date.getDate();
 // Below is the mongo DB url strings
 //mongo "mongodb+srv://cluster-hp-01.fr9grbr.mongodb.net/todoListsDB" --username mongoadmin
 
-//const mongoDB = "mongodb://"+dbUser+":"+dbPasswd+"@"+srvURL+"/"+dbName;
-const mongoDB = 'mongodb+srv://'+dbUser+':'+dbPasswd+'@'+srvURL+'/'+dbName+'?retryWrites=true&w=majority';
+const mongoDB = "mongodb://"+dbUser+":"+dbPasswd+"@"+srvURL+"/"+dbName;
+//const mongoDB = 'mongodb+srv://'+dbUser+':'+dbPasswd+'@'+srvURL+'/'+dbName+'?retryWrites=true&w=majority';
 
 main().catch(err => console.log(err));
 async function main() {
@@ -61,6 +61,10 @@ const itemsSchema = new mongoose.Schema ({
       enum: ['NEW', 'COMPLETE'],
       default: 'NEW'
     },
+    createdOn: {
+        type: Date,
+        default: Date.now
+    }
   });
 
 const listsSchema = new mongoose.Schema ({
@@ -79,7 +83,8 @@ const List = mongoose.model("List", listsSchema);
 const item1 = Item(
     {
         name: "Sample New Item 1",
-        status: "NEW"
+        status: "NEW",
+        createdOn: new Date()
     }
 );
 
@@ -122,6 +127,7 @@ app.get('/', (req, res)=> {
 
 app.get('/:customListName',(req, res) => {
     let listKind = _.capitalize(req.params.customListName);
+    let typeOfItemsView = "all";
     //console.log(listKind);
 
     List.findOne({name: listKind},null,{sort: {status: -1}}, (err, foundList)=>{
@@ -144,8 +150,93 @@ app.get('/:customListName',(req, res) => {
                 let sortedItems = foundList.items.sort((a,b)=>{if (a.status > b.status) {return -1;}});
                 //console.log("Sorted Items -->"+sortedItems);
 
-                //console.log("Items --> "+foundList);
-                res.render('list',{dayOfWeek: currentDay, newItems: sortedItems, typeOfList: foundList.name});
+                //console.log("Items --> "+foundList+" with view type "+typeOfItemsView);
+                res.render('list',{dayOfWeek: currentDay, newItems: sortedItems, typeOfList: foundList.name, view: typeOfItemsView});
+            
+            }
+            
+
+        }else{
+            console.log("Error received => "+err);   
+        }
+    });
+    
+    
+
+
+    //res.render('list',{dayOfWeek: currentDay, newItems: workItems, typeOfList: listKind.slice(1,)});
+})
+
+
+app.get('/:customListName/activeTasks',(req, res) => {
+    let listKind = _.capitalize(req.params.customListName);
+    let typeOfItemsView = "new";
+    //console.log(listKind);
+
+    List.findOne({name: listKind},null,{sort: {status: -1}}, (err, foundList)=>{
+        if(!err){
+            if( foundList === null){
+                // create a new list
+
+                const newList = new List({
+                    name: listKind,
+                    items: defaultItemsList
+                });
+            
+                newList.save();
+                res.redirect("/"+listKind);
+            }
+            else{
+
+                // show the existing list
+                //console.log(listKind+" list already exists!")
+                let sortedItems = foundList.items.sort((a,b)=>{if (a.status > b.status) {return -1;}});
+                //console.log("Sorted Items -->"+sortedItems);
+
+                //console.log("Items --> "+foundList+" with view type "+typeOfItemsView);
+                res.render('list',{dayOfWeek: currentDay, newItems: sortedItems.filter(o =>{return o.status == "NEW"}), typeOfList: foundList.name, view: typeOfItemsView});
+            
+            }
+            
+
+        }else{
+            console.log("Error received => "+err);   
+        }
+    });
+    
+    
+
+
+    //res.render('list',{dayOfWeek: currentDay, newItems: workItems, typeOfList: listKind.slice(1,)});
+})
+
+app.get('/:customListName/completeTasks',(req, res) => {
+    let listKind = _.capitalize(req.params.customListName);
+    let typeOfItemsView = "complete";
+    //console.log(listKind);
+
+    List.findOne({name: listKind},null,{sort: {status: -1}}, (err, foundList)=>{
+        if(!err){
+            if( foundList === null){
+                // create a new list
+
+                const newList = new List({
+                    name: listKind,
+                    items: defaultItemsList
+                });
+            
+                newList.save();
+                res.redirect("/"+listKind);
+            }
+            else{
+
+                // show the existing list
+                //console.log(listKind+" list already exists!")
+                let sortedItems = foundList.items.sort((a,b)=>{if (a.status > b.status) {return -1;}});
+                //console.log("Sorted Items -->"+sortedItems);
+
+                //console.log("Items --> "+foundList+" with view type "+typeOfItemsView);
+                res.render('list',{dayOfWeek: currentDay, newItems: sortedItems.filter(o =>{return o.status == "COMPLETE"}), typeOfList: foundList.name, view: typeOfItemsView});
             
             }
             
@@ -168,7 +259,8 @@ app.post('/', (req, res) => {
     const item = Item(
         {
             name: newListItem,
-            status: "NEW"
+            status: "NEW",
+            createdOn: new Date()
         }
     );
     console.log("Passed Item is --> "+item);
