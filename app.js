@@ -13,10 +13,12 @@ const dbUser = process.env.N1_KEY || "listsAdmin";
 const dbPasswd = process.env.N1_SECRET || "Listadmin123";
 const dbName = process.env.N1_DB || "todoListsDB"; */
 
+
 const srvURL = process.env.N1_URL;
 const dbUser = process.env.N1_KEY;
 const dbPasswd = process.env.N1_SECRET;
-const dbName = process.env.N1_DB;
+const dbName = process.env.N1_DB; 
+
 
 mongoose.set("strictQuery", false);
 
@@ -259,6 +261,7 @@ app.get('/:customListName/completeTasks',(req, res) => {
 app.post('/', (req, res) => {
     let newListItem = req.body.newItem;
     let listType = req.body.listName;
+    let fromView = req.body.fromView;
     
     const item = Item(
         {
@@ -272,14 +275,30 @@ app.post('/', (req, res) => {
 
     if (listType === "Default"){
         item.save();
-        res.redirect("/");
+        if (fromView === "all"){
+            res.redirect("/");
+        }
+        else if (fromView === "new"){
+            res.redirect("/activeTasks");
+        }
+        else{
+            res.redirect("/completeTasks");
+        }
     }
     else {
         List.findOne({name: listType}, (err, foundList) =>{
             foundList.items.push(item);
             foundList.save();
         });
-        res.redirect("/"+ listType);
+        if (fromView === "all"){
+            res.redirect("/"+ listType);
+        }
+        else if (fromView === "new"){
+            res.redirect("/"+ listType +"/activeTasks");
+        }
+        else{
+            res.redirect("/"+ listType +"/completeTasks");
+        }
     }        
         
 })
@@ -287,6 +306,7 @@ app.post('/', (req, res) => {
 app.post('/delete', (req, res) => {
     let deleteItemIds = req.body.checkboxId;
     let listType = req.body.listName;
+    let fromView = req.body.fromView;
     
     console.log("The array length of delete Item lists is ==>"+deleteItemIds.length);
     
@@ -311,7 +331,15 @@ app.post('/delete', (req, res) => {
             });
         }
                 
-        res.redirect("/");
+        if (fromView === "all"){
+            res.redirect("/");
+        }
+        else if (fromView === "new"){
+            res.redirect("/activeTasks");
+        }
+        else{
+            res.redirect("/completeTasks");
+        }
     }
     else{
         if (Array.isArray(deleteItemIds)){
@@ -331,7 +359,15 @@ app.post('/delete', (req, res) => {
             });
         }
         
-        res.redirect("/"+ listType);
+        if (fromView === "all"){
+            res.redirect("/"+ listType);
+        }
+        else if (fromView === "new"){
+            res.redirect("/"+ listType +"/activeTasks");
+        }
+        else{
+            res.redirect("/"+ listType +"/completeTasks");
+        }
 
         /* List.findOneAndUpdate({ name: listType}, {$pull : { items : {_id : deleteItemIds }}}, (err, foundList)=>{
             if(!err){
