@@ -23,11 +23,13 @@
                             
             <% }); %>
                 <input type="hidden" name="listName" value="<%= typeOfList %>"></input>
+                <input type="hidden" name="fromView" value="<%= view %>"></input>
                 
             </form>
             <form class="item" action="/" method="POST">
                 <input type="text" name="newItem" placeholder="New Item" autocomplete="off" maxlength="50"  required>
                 <input type="hidden" name="listName" value="<%= typeOfList %>"></input>
+                <input type="hidden" name="fromView" value="<%= view %>"></input>
                 <button type="submit" name="addButton" >+</button>
             </form>
         </div>
