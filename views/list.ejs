@@ -5,24 +5,32 @@
         <h1> <%= typeOfList %> List</h1>
         <h2> <%= dayOfWeek %> </h2> 
     </div>
-    <div class="box" id="">
-        <form id="listItemsForm" action="/delete" method="post">
-        <% newItems.forEach(element => {%>
-                <div class="item">
-                    <input type="checkbox" name="checkboxId" value="<%= element._id %>" onchange="document.getElementById('listItemsForm').submit()"  
-                    <% if (element.status === "COMPLETE") {  %> checked <% } %>>
-                    <p> <%= element.name %> </p>
-                </div> 
-                           
-        <% }); %>
-            <input type="hidden" name="listName" value="<%= typeOfList %>"></input>
-            
-        </form>
-        <form class="item" action="/" method="POST">
-            <input type="text" name="newItem" placeholder="New Item" autocomplete="off" maxlength="50"  required>
-            <input type="hidden" name="listName" value="<%= typeOfList %>"></input>
-            <button type="submit" name="addButton" >+</button>
-        </form>
+    <div class="box" id="listItemsBox">
+        <div class="tab">
+            <a class="tablinks tabbuttons tabheadings <% if (view === 'new') { %>activeheadings<% } %>" href="/<%= typeOfList %>/activeTasks" >Active</a>
+            <a class="tablinks tabbuttons tabheadings <% if (view === 'complete') { %>activeheadings<% } %>" href="/<%= typeOfList %>/completeTasks" >Finished</a>
+            <a class="tablinks tabbuttons tabheadings <% if (view === 'all') { %>activeheadings<% } %>" href="/<%= typeOfList %>" >All</a>
+        </div>
+        <div class="tabcontent">
+            <form id="listItemsForm" action="/delete" method="POST">
+            <% newItems.forEach(element => {%>
+                    <div class="item">
+                        <input type="checkbox" name="checkboxId" value="<%= element._id %>" onchange="document.getElementById('listItemsForm').submit()"  
+                        <% if (element.status === "COMPLETE") {  %> checked <% } %>>
+                        <p class="itemStyle"> <%= element.name %> <sub><%= element.createdOn.toLocaleDateString('en-IN', { year:"numeric", month:"numeric", day:"numeric", hour:"numeric", minute: "numeric"}) %></sub>  </p>
+                        
+                    </div> 
+                            
+            <% }); %>
+                <input type="hidden" name="listName" value="<%= typeOfList %>"></input>
+                
+            </form>
+            <form class="item" action="/" method="POST">
+                <input type="text" name="newItem" placeholder="New Item" autocomplete="off" maxlength="50"  required>
+                <input type="hidden" name="listName" value="<%= typeOfList %>"></input>
+                <button type="submit" name="addButton" >+</button>
+            </form>
+        </div>
+        
     </div>
-
 <%- include('footer') -%>
