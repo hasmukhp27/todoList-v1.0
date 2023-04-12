@@ -97,7 +97,7 @@ footer {
 
 .tab {
   overflow: hidden;
-  border: 1px solid #ccc;
+  border: 2px solid #ccc;
   background-color: #b9b6b6;
 }
 
@@ -156,7 +156,7 @@ footer {
   width: 31%;
   text-align: center;
   border-radius: 5px;
-  border-style: double;
+  border-style:groove;
   border-color: transparent;
   color: #fff;
   font-size: 30px;
