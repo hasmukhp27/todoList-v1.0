@@ -16,7 +16,7 @@
             <% newItems.forEach(element => {%>
                     <div class="item">
                         <input type="checkbox" name="checkboxId" value="<%= element._id %>" onchange="document.getElementById('listItemsForm').submit()"  
-                        <% if (element.status === "COMPLETE") {  %> checked <% } %>>
+                        <% if (element.status === "COMPLETE") {  %> checked disabled<% } %>>
                         <p class="itemStyle"> <%= element.name %> <sub><%= element.createdOn.toLocaleDateString('en-IN', { year:"numeric", month:"numeric", day:"numeric", hour:"numeric", minute: "numeric"}) %></sub>  </p>
                         
                     </div> 
