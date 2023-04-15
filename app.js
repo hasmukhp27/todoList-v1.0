@@ -8,16 +8,16 @@ const _ = require("lodash");
 require("dotenv").config();
 
 //Setting up MongoDB COnnections and it's values through process envirnment variables. 
-const srvURL = process.env.N1_URL || "127.0.0.1:27017";
+/* const srvURL = process.env.N1_URL || "127.0.0.1:27017";
 const dbUser = process.env.N1_KEY || "listsAdmin";
 const dbPasswd = process.env.N1_SECRET || "Listadmin123";
-const dbName = process.env.N1_DB || "todoListsDB";
+const dbName = process.env.N1_DB || "todoListsDB"; */
 
 
-/* const srvURL = process.env.N1_URL;
+const srvURL = process.env.N1_URL;
 const dbUser = process.env.N1_KEY;
 const dbPasswd = process.env.N1_SECRET;
-const dbName = process.env.N1_DB;  */
+const dbName = process.env.N1_DB; 
 
 
 mongoose.set("strictQuery", false);
@@ -43,8 +43,8 @@ const currentDay = date.getDate();
 // Below is the mongo DB url strings
 //mongo "mongodb+srv://cluster-hp-01.fr9grbr.mongodb.net/todoListsDB" --username mongoadmin
 
-const mongoDB = "mongodb://"+dbUser+":"+dbPasswd+"@"+srvURL+"/"+dbName;
-//const mongoDB = 'mongodb+srv://'+dbUser+':'+dbPasswd+'@'+srvURL+'/'+dbName+'?retryWrites=true&w=majority';
+//const mongoDB = "mongodb://"+dbUser+":"+dbPasswd+"@"+srvURL+"/"+dbName;
+const mongoDB = 'mongodb+srv://'+dbUser+':'+dbPasswd+'@'+srvURL+'/'+dbName+'?retryWrites=true&w=majority';
 
 main().catch(err => console.log(err));
 async function main() {
