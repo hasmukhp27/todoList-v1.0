@@ -8,16 +8,16 @@ const _ = require("lodash");
 require("dotenv").config();
 
 //Setting up MongoDB COnnections and it's values through process envirnment variables. 
-/* const srvURL = process.env.N1_URL || "127.0.0.1:27017";
+const srvURL = process.env.N1_URL || "127.0.0.1:27017";
 const dbUser = process.env.N1_KEY || "listsAdmin";
 const dbPasswd = process.env.N1_SECRET || "Listadmin123";
-const dbName = process.env.N1_DB || "todoListsDB"; */
+const dbName = process.env.N1_DB || "todoListsDB";
 
 
-const srvURL = process.env.N1_URL;
+/* const srvURL = process.env.N1_URL;
 const dbUser = process.env.N1_KEY;
 const dbPasswd = process.env.N1_SECRET;
-const dbName = process.env.N1_DB; 
+const dbName = process.env.N1_DB;  */
 
 
 mongoose.set("strictQuery", false);
@@ -43,8 +43,8 @@ const currentDay = date.getDate();
 // Below is the mongo DB url strings
 //mongo "mongodb+srv://cluster-hp-01.fr9grbr.mongodb.net/todoListsDB" --username mongoadmin
 
-//const mongoDB = "mongodb://"+dbUser+":"+dbPasswd+"@"+srvURL+"/"+dbName;
-const mongoDB = 'mongodb+srv://'+dbUser+':'+dbPasswd+'@'+srvURL+'/'+dbName+'?retryWrites=true&w=majority';
+const mongoDB = "mongodb://"+dbUser+":"+dbPasswd+"@"+srvURL+"/"+dbName;
+//const mongoDB = 'mongodb+srv://'+dbUser+':'+dbPasswd+'@'+srvURL+'/'+dbName+'?retryWrites=true&w=majority';
 
 main().catch(err => console.log(err));
 async function main() {
@@ -136,7 +136,7 @@ app.get('/:customListName',(req, res) => {
     let typeOfItemsView = "all";
     //console.log(listKind);
 
-    List.findOne({name: listKind},null,{sort: {status: -1}}, (err, foundList)=>{
+    List.findOne({name: listKind},null, (err, foundList)=>{
         if(!err){
             if( foundList === null){
                 // create a new list
@@ -153,7 +153,14 @@ app.get('/:customListName',(req, res) => {
 
                 // show the existing list
                 //console.log(listKind+" list already exists!")
-                let sortedItems = foundList.items.sort((a,b)=>{if (a.status > b.status) {return -1;}});
+                let sortedItems = foundList.items.sort((a,b)=>{
+                    if (a.status === b.status) {
+                        return a.createdOn > b.createdOnreturn ? 1 : -1;
+                    }else{
+                        return a.status > b.status ? -1 : 1;
+                    }
+                    
+                });
                 //console.log("Sorted Items -->"+sortedItems);
 
                 //console.log("Items --> "+foundList+" with view type "+typeOfItemsView);
@@ -179,7 +186,7 @@ app.get('/:customListName/activeTasks',(req, res) => {
     let typeOfItemsView = "new";
     //console.log(listKind);
 
-    List.findOne({name: listKind},null,{sort: {status: -1}}, (err, foundList)=>{
+    List.findOne({name: listKind},null, (err, foundList)=>{
         if(!err){
             if( foundList === null){
                 // create a new list
@@ -196,7 +203,7 @@ app.get('/:customListName/activeTasks',(req, res) => {
 
                 // show the existing list
                 //console.log(listKind+" list already exists!")
-                let sortedItems = foundList.items.sort((a,b)=>{if (a.status > b.status) {return -1;}});
+                let sortedItems = foundList.items.sort((a,b)=>{if (a.createdOn > b.createdOn) {return -1;}});
                 //console.log("Sorted Items -->"+sortedItems);
 
                 //console.log("Items --> "+foundList+" with view type "+typeOfItemsView);
@@ -221,7 +228,7 @@ app.get('/:customListName/completeTasks',(req, res) => {
     let typeOfItemsView = "complete";
     //console.log(listKind);
 
-    List.findOne({name: listKind},null,{sort: {status: -1}}, (err, foundList)=>{
+    List.findOne({name: listKind},null, (err, foundList)=>{
         if(!err){
             if( foundList === null){
                 // create a new list
@@ -238,7 +245,7 @@ app.get('/:customListName/completeTasks',(req, res) => {
 
                 // show the existing list
                 //console.log(listKind+" list already exists!")
-                let sortedItems = foundList.items.sort((a,b)=>{if (a.status > b.status) {return -1;}});
+                let sortedItems = foundList.items.sort((a,b)=>{if (a.createdOn > b.createdOn) {return -1;}});
                 //console.log("Sorted Items -->"+sortedItems);
 
                 //console.log("Items --> "+foundList+" with view type "+typeOfItemsView);
